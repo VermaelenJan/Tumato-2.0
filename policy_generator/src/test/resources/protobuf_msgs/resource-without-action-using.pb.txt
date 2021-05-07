@@ -1,0 +1,63 @@
+state_var_block {
+  state_variables {
+    name: "S_clamp"
+    values: "open"
+    values: "opening"
+    values: "closed"
+    values: "closing"
+  }
+  state_variables {
+    name: "S_clamp_button"
+    values: "pressed"
+    values: "not_pressed"
+  }
+  state_variables {
+    name: "S_front_clamping_coil"
+    values: "working_range"
+    values: "maximum"
+    values: "no_signal"
+    values: "short_circuit"
+    values: "signals_at_different_tact_time"
+  }
+  state_variables {
+    name: "S_front_releasing_coil"
+    values: "working_range"
+    values: "maximum"
+    values: "no_signal"
+    values: "short_circuit"
+    values: "signals_at_different_tact_time"
+  }
+}
+resource_block {
+  resources {
+    name: "VELOCITY_CONTROL"
+  }
+}
+actions_block {
+  actions {
+    name: "nothing"
+  }
+}
+reaction_rules_block {
+}
+assumptions_block {
+}
+aliases {
+}
+goal {
+  goals {
+    execution_type: PRIORITY
+    goals {
+      simple_goal {
+        body {
+          action_execution_predicate {
+            value: "nothing"
+          }
+        }
+      }
+    }
+  }
+}
+config {
+  plan_size_max: 10
+}

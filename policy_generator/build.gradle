@@ -1,0 +1,89 @@
+group 'ai.ivex'
+version '1.0-SNAPSHOT'
+
+
+apply plugin: "java"
+apply plugin: "idea"
+apply plugin: 'com.google.protobuf'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.6'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.6.0'
+    }
+}
+
+clean {
+    delete "$projectDir/src/main/generated"
+    delete "$projectDir/src/test/generated_tests"
+}
+
+task runMainClass(type: JavaExec) {
+    if (!project.hasProperty("main_class")) {
+        println "Please specify main class. You can ignore this message if you are not using runMainClass task."
+        ext.main_class = ""
+    }
+
+    classpath = sourceSets.main.runtimeClasspath
+    main = "$main_class"
+    maxHeapSize "8g"
+}
+
+task startServer(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "ai.ivex.policygenerator.server.Server"
+    maxHeapSize "8g"
+}
+
+task generatePolicy(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = "ai.ivex.policygenerator.CommandLineGenerator"
+    maxHeapSize "8g"
+}
+
+dependencies {
+    compile 'com.google.protobuf:protobuf-java:3.6.0'
+    compile 'org.choco-solver:choco-solver:4.0.5'
+    compile 'com.google.guava:guava:25.1-jre'
+    compile 'it.unimi.dsi:fastutil:8.2.1'
+    compile 'com.google.auto.value:auto-value:1.4.1'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile 'com.sparkjava:spark-core:2.7.2'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-compress:1.16.1'
+    compile 'org.tukaani:xz:1.8'
+
+    testCompile 'org.assertj:assertj-core:3.10.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+    testCompile 'org.mockito:mockito-core:2.20.0'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+
+        sourceDirs += file('src/main/generated')
+        generatedSourceDirs += file('src/main/generated')
+
+        testSourceDirs += file('src/test/generated_tests')
+    }
+}

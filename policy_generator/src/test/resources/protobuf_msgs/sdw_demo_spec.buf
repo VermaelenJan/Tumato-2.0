@@ -1,0 +1,325 @@
+state_var_block {
+  state_variables {
+    name: "S_flying"
+    values: "flying"
+    values: "on_the_ground"
+  }
+  state_variables {
+    name: "S_location"
+    values: "home"
+    values: "A"
+    values: "B"
+  }
+  state_variables {
+    name: "S_picture_taken"
+    values: "taken"
+    values: "not_taken"
+  }
+  state_variables {
+    name: "S_air_sampled"
+    values: "sampled"
+    values: "not_sampled"
+  }
+}
+resource_block {
+  resources {
+    name: "VELOCITY_CONTROL"
+  }
+  resources {
+    name: "CAMERA"
+  }
+  resources {
+    name: "SAMPLER"
+  }
+}
+actions_block {
+  actions {
+    name: "take_off"
+    cost: 20
+    resources: "VELOCITY_CONTROL"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "on_the_ground"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+  }
+  actions {
+    name: "land"
+    cost: -15
+    resources: "VELOCITY_CONTROL"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "on_the_ground"
+      }
+    }
+  }
+  actions {
+    name: "goto_a"
+    resources: "VELOCITY_CONTROL"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_location"
+        right_value: "A"
+      }
+    }
+  }
+  actions {
+    name: "goto_b"
+    resources: "VELOCITY_CONTROL"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_location"
+        right_value: "B"
+      }
+    }
+  }
+  actions {
+    name: "goto_home"
+    resources: "VELOCITY_CONTROL"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_location"
+        right_value: "home"
+      }
+    }
+  }
+  actions {
+    name: "velocity_noop"
+    resources: "VELOCITY_CONTROL"
+  }
+  actions {
+    name: "take_picture"
+    resources: "CAMERA"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_location"
+        right_value: "A"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_picture_taken"
+        right_value: "taken"
+      }
+    }
+  }
+  actions {
+    name: "camera_noop"
+    resources: "CAMERA"
+  }
+  actions {
+    name: "take_sample"
+    resources: "SAMPLER"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_location"
+        right_value: "B"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_air_sampled"
+        right_value: "sampled"
+      }
+    }
+  }
+  actions {
+    name: "sampler_noop"
+    resources: "SAMPLER"
+  }
+}
+reaction_rules_block {
+  rules {
+    implication_predicate {
+      left_value {
+        action_execution_predicate {
+          value: "take_picture"
+        }
+      }
+      right_value {
+        action_execution_predicate {
+          value: "velocity_noop"
+        }
+      }
+    }
+  }
+  rules {
+    implication_predicate {
+      left_value {
+        action_execution_predicate {
+          value: "take_sample"
+        }
+      }
+      right_value {
+        and_predicate {
+          left_value {
+            action_execution_predicate {
+              value: "velocity_noop"
+            }
+          }
+          right_value {
+            equivalence_predicate {
+              left_value {
+                value_comparison_predicate {
+                  left_value: "S_air_sampled"
+                  right_value: "not_sampled"
+                }
+              }
+              right_value {
+                constant_predicate {
+                  value: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+assumptions_block {
+}
+aliases {
+  aliases {
+    name: "mission_completed"
+    value {
+      and_predicate {
+        left_value {
+          value_comparison_predicate {
+            left_value: "S_picture_taken"
+            right_value: "taken"
+          }
+        }
+        right_value {
+          value_comparison_predicate {
+            left_value: "S_air_sampled"
+            right_value: "sampled"
+          }
+        }
+      }
+    }
+  }
+}
+goal {
+  goals {
+    execution_type: CONSTRAINT
+    goals {
+      conditional_goal {
+        condition {
+          alias_reference_predicate {
+            value: "mission_completed"
+          }
+        }
+        goal {
+          simple_goal {
+            body {
+              and_predicate {
+                left_value {
+                  value_comparison_predicate {
+                    left_value: "S_flying"
+                    right_value: "on_the_ground"
+                  }
+                }
+                right_value {
+                  value_comparison_predicate {
+                    left_value: "S_location"
+                    right_value: "home"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    goals {
+      conditional_goal {
+        condition {
+          value_comparison_predicate {
+            left_value: "S_picture_taken"
+            right_value: "not_taken"
+          }
+        }
+        goal {
+          simple_goal {
+            body {
+              value_comparison_predicate {
+                left_value: "S_picture_taken"
+                right_value: "taken"
+              }
+            }
+          }
+        }
+      }
+    }
+    goals {
+      conditional_goal {
+        condition {
+          value_comparison_predicate {
+            left_value: "S_air_sampled"
+            right_value: "not_sampled"
+          }
+        }
+        goal {
+          goal_list {
+            execution_type: PRIORITY
+            goals {
+              simple_goal {
+                body {
+                  value_comparison_predicate {
+                    left_value: "S_air_sampled"
+                    right_value: "sampled"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    goals {
+      simple_goal {
+        body {
+          constant_predicate {
+            value: false
+          }
+        }
+      }
+    }
+  }
+}
+config {
+  plan_size_max: 10
+}

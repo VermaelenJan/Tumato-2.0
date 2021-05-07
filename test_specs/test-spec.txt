@@ -1,0 +1,46 @@
+BEGIN STATE VECTOR
+state S_flying can be flying, on_the_ground
+state S_destination can be reached, not_reached
+END STATE VECTOR
+
+BEGIN RESOURCES
+resource rotors
+END RESOURCES
+
+BEGIN ACTIONS
+action take_off
+cost: 1
+controlled resources: rotors
+preconditions: S_flying is on_the_ground
+effects: S_flying is flying
+
+action land
+cost: 1 
+controlled resources: rotors
+preconditions: S_flying is flying
+effects: S_flying is on_the_ground
+
+action go_to_waypoint
+cost: 1
+controlled resources: rotors
+preconditions: S_flying is flying AND S_destination is not_reached
+effects: S_destination is reached
+
+action turn_on_led_light 
+cost: 1
+preconditions: none
+effects: none
+END ACTIONS
+
+BEGIN REACTION RULES
+rule: IF executing go_to_waypoint THEN executing turn_on_led_light
+END REACTION RULES
+
+BEGIN GOALS
+goal type: constraint
+goal: S_flying is on_the_ground AND S_destination is reached
+END GOALS
+
+BEGIN CONFIG
+max_plan_length: 3
+END CONFIG

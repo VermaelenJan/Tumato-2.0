@@ -1,0 +1,13 @@
+<configuration>
+  <timestamp key="bySecond" datePattern="yyyy-MM-dd-HH-mm-ss"/>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="ai.ivex.policygenerator" level="DEBUG" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+</configuration>

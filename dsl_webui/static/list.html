@@ -1,0 +1,81 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>IVEX WebAI</title>
+    <script type="text/javascript" src="static/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="static/js/specstorage.js"></script>
+</head>
+<body>
+<h2>Create New Specification</h2>
+<form onsubmit="createSpec()">
+    <input id="name-field" type="text" placeholder="Specification Name"/>
+    <input type="checkbox" id="use-tutorial"><label for="use-tutorial">Start from tutorial</label><br><br>
+    <input type="button" value="Submit" onclick="createSpec()"/>
+
+
+    <h2>Saved Specifications</h2>
+    <div id="spec-list">
+    </div>
+</form>
+</body>
+<script>
+    async function createSpec() {
+        let name = document.getElementById("name-field").value;
+        let useTutorial = !!document.getElementById("use-tutorial").checked;
+        if (nameExists(name)) {
+            alert('Name already in use');
+            return
+        }
+        let savePromise = new Promise((resolve, reject) =>
+            jQuery.post(
+                "create/spec",
+                {"tutorial": useTutorial}
+            ).done(resolve).fail(reject)
+        );
+        let location = await savePromise;
+        saveSpec(name, location);
+        window.location = generateUrl(location, name);
+    }
+
+    function generateSavedSpecs() {
+        const div = document.getElementById('spec-list');
+        const specList = getSpecs();
+        if (specList.length === 0) {
+            div.innerHTML = "No saved specifications.";
+            return;
+        }
+
+        for (let i = 0; i < specList.length; i++) {
+            const specName = specList[i];
+            const specLocation = localStorage.getItem(specName);
+
+            let removeLink = document.createElement('a');
+            removeLink.onclick = () => remove(specName);
+            removeLink.href = "javascript:void(0)";
+            removeLink.innerHTML = "[x]";
+            removeLink.style = "margin-right:10px";
+            div.appendChild(removeLink);
+
+            let link = document.createElement('a');
+            link.href = generateUrl(specLocation, specName);
+            link.innerHTML = specName;
+            div.appendChild(link);
+
+            div.appendChild(document.createElement('br'));
+        }
+    }
+
+    function generateUrl(id, name) {
+        return '/editor?id=' + id + "&name=" + encodeURIComponent(name);
+    }
+
+    function remove(name) {
+        if (!window.confirm("Are you sure you want to delete " + name + "?")) return;
+        deleteSpec(name);
+        location.reload()
+    }
+
+    generateSavedSpecs();
+</script>
+</html>

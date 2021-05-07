@@ -1,0 +1,34 @@
+syntax = "proto2";
+
+package specdomain;
+import public "Predicate.proto";
+
+option java_package = "generated.ai.ivex.specdomain";
+option java_outer_classname = "GoalProtos";
+
+message Goal {
+    oneof goal {
+        SimpleGoal simple_goal = 1;
+        ConditionalGoal conditional_goal = 2;
+        GoalList goal_list = 3;
+    }
+}
+
+message SimpleGoal {
+    required Predicate body = 1;
+}
+
+message ConditionalGoal {
+    required Predicate condition = 1;
+    required Goal goal = 2;
+}
+
+message GoalList {
+    required ExecutionType execution_type = 1;
+    repeated Goal goals = 2;
+
+    enum ExecutionType{
+        PRIORITY = 0;
+        CONSTRAINT = 1;
+    }
+}

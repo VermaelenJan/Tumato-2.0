@@ -1,0 +1,13 @@
+#error-view .state-var-name {
+    color: #0000bb;
+    font-weight: 600;
+}
+
+#error-view .state-var-name:after{
+    content: ": ";
+}
+
+#error-view .state-var-value {
+    color: #005aff;
+    font-style: italic;
+}

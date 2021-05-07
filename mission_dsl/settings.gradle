@@ -1,0 +1,3 @@
+include "ai.ivex.specdsl"
+include "ai.ivex.specdsl.ide"
+include "ai.ivex.specdsl.web"

@@ -1,0 +1,132 @@
+state_var_block {
+  state_variables {
+    name: "S_flying"
+    values: "flying"
+    values: "on_the_ground"
+  }
+  state_variables {
+    name: "S_destination"
+    values: "reached"
+    values: "not_reached"
+  }
+}
+resource_block {
+  resources {
+    name: "rotors"
+  }
+}
+actions_block {
+  actions {
+    name: "take_off"
+    cost: 1
+    resources: "rotors"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "on_the_ground"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+  }
+  actions {
+    name: "land"
+    cost: 1
+    resources: "rotors"
+    preconditions {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "flying"
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_flying"
+        right_value: "on_the_ground"
+      }
+    }
+  }
+  actions {
+    name: "go_to_waypoint"
+    cost: 1
+    resources: "rotors"
+    preconditions {
+      and_predicate {
+        left_value {
+          value_comparison_predicate {
+            left_value: "S_flying"
+            right_value: "flying"
+          }
+        }
+        right_value {
+          value_comparison_predicate {
+            left_value: "S_destination"
+            right_value: "not_reached"
+          }
+        }
+      }
+    }
+    effects {
+      value_comparison_predicate {
+        left_value: "S_destination"
+        right_value: "reached"
+      }
+    }
+  }
+  actions {
+    name: "turn_on_led_light"
+    cost: 1
+  }
+}
+reaction_rules_block {
+  rules {
+    implication_predicate {
+      left_value {
+        action_execution_predicate {
+          value: "go_to_waypoint"
+        }
+      }
+      right_value {
+        action_execution_predicate {
+          value: "turn_on_led_light"
+        }
+      }
+    }
+  }
+}
+assumptions_block {
+}
+aliases {
+}
+goal {
+  goals {
+    execution_type: CONSTRAINT
+    goals {
+      simple_goal {
+        body {
+          and_predicate {
+            left_value {
+              value_comparison_predicate {
+                left_value: "S_flying"
+                right_value: "on_the_ground"
+              }
+            }
+            right_value {
+              value_comparison_predicate {
+                left_value: "S_destination"
+                right_value: "reached"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+config {
+  plan_size_max: 3
+}

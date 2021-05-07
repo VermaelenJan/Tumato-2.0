@@ -1,0 +1,75 @@
+syntax = "proto2";
+
+package specdomain;
+import public "Predicate.proto";
+import public "Goal.proto";
+
+option java_package = "generated.ai.ivex.specdomain";
+option java_outer_classname = "SpecificationProtos";
+
+message Specification {
+    required StateVarBlock state_var_block = 1;
+    required ResourceBlock resource_block = 2;
+    required ActionBlock actions_block = 3;
+    required ReactionRulesBlock reaction_rules_block = 4;
+    required AssumptionsBlock assumptions_block = 5;
+    required AliasBlock aliases = 6;
+    required GoalBlock goal = 7;
+    required Config config = 8;
+}
+
+
+
+message StateVarBlock {
+    repeated StateVariable state_variables = 1;
+}
+
+message StateVariable {
+    required string name = 1;
+    repeated string values = 2;
+}
+
+message ResourceBlock {
+    repeated Resource resources = 1;
+}
+
+message Resource {
+    required string name = 1;
+}
+
+message ActionBlock {
+    repeated Action actions = 1;
+}
+
+message ReactionRulesBlock {
+    repeated Predicate rules = 1;
+}
+
+message AssumptionsBlock {
+    repeated Predicate assumptions = 1;
+}
+
+message Action {
+    required string name = 1;
+    optional int32 cost = 2 [default = 0];
+    repeated string resources = 3;
+    repeated Predicate preconditions = 4;
+    repeated Predicate effects = 5;
+}
+
+message AliasBlock {
+    repeated Alias aliases = 1;
+}
+
+message Alias {
+    required string name = 1;
+    required Predicate value = 2;
+}
+
+message Config {
+    required int32 plan_size_max = 1;
+}
+
+message GoalBlock {
+    optional GoalList goals = 1;
+}

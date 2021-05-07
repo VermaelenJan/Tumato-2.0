@@ -1,0 +1,63 @@
+state_var_block {
+  state_variables {
+    name: "S1"
+    values: "yes"
+    values: "no"
+  }
+  state_variables {
+    name: "S2"
+    values: "yes"
+    values: "no"
+  }
+}
+resource_block {
+}
+actions_block {
+  actions {
+    name: "MockAction"
+    cost: 1
+  }
+}
+reaction_rules_block {
+}
+assumptions_block {
+}
+aliases {
+}
+goal {
+  goals {
+    execution_type: CONSTRAINT
+    goals {
+      conditional_goal {
+        condition {
+          implication_predicate {
+            left_value {
+              value_comparison_predicate {
+                left_value: "S1"
+                right_value: "yes"
+              }
+            }
+            right_value {
+              value_comparison_predicate {
+                left_value: "S2"
+                right_value: "yes"
+              }
+            }
+          }
+        }
+        goal {
+          simple_goal {
+            body {
+              action_execution_predicate {
+                value: "MockAction"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+config {
+  plan_size_max: 1
+}

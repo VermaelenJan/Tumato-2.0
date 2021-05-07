@@ -1,0 +1,265 @@
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font: 16px Helvetica, sans-serif;
+    margin: 0;
+}
+
+h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    margin: 0;
+}
+
+a {
+    color: #22a;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.container {
+    /*margin: 20px;*/
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: column;
+}
+
+.header {
+    display: flex;
+    background: linear-gradient(135deg, #3841b3 0, #3f7f7f 100%);
+    color: white;
+    flex-basis: 3em;
+    flex-shrink: 0;
+    padding: 10px 30px 5px;
+    align-items: flex-end;
+    box-shadow: 0 0 14px 0 #676767;
+    z-index: 10;
+}
+
+.header h1 {
+
+}
+
+.header .buttons {
+    margin-left: 4em;
+}
+
+.content {
+    display: flex;
+    overflow: hidden;
+    flex-grow: 1;
+    background: #e8e8e8;
+}
+
+.editor-wrapper {
+    position: relative;
+    flex-basis: 640px;
+    flex-grow: 1;
+    background: white;
+}
+
+#xtext-editor {
+    position: absolute;
+    top: 0.5em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.textview {
+    font-size: 14px;
+}
+
+.output-wrapper {
+    position: relative;
+    flex-grow: 1;
+    flex-basis: 400px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#output-tab-headers {
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-basis: 40px;
+    line-height: 40px;
+    background: #EEE;
+    box-shadow: 0 0 5px 5px rgba(200, 200, 200, 0.5);
+    border-bottom-left-radius: 5px;
+}
+
+.tab-header {
+    float: left;
+    padding: 0 10px;
+    margin: 0 10px;
+    border-bottom: 3px solid rgba(0, 0, 0, 0);
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.tab-header:hover {
+    border-bottom: 3px solid #3da9f5;
+}
+
+.tab-header.active {
+    border-bottom: 3px solid #687dca;
+}
+
+.output-tab {
+    position: relative;
+    font-size: 12px;
+    flex-shrink: 1;
+    flex-grow: 1;
+    display: none;
+}
+
+.output-tab.active {
+    display: block;
+}
+
+.code-view-wrapper {
+    position: absolute;
+    top: 1em;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.code-view-wrapper .syntaxhighlighter{
+    height: 100%;
+    margin: 0 !important;
+}
+
+.code-view-wrapper .download-button{
+    position: absolute;
+    top: 0;
+    right: 30px;
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.code-view-wrapper .download-button:hover{
+    background: black;
+    color: white;
+}
+
+.toolbar {
+    display: none !important;
+}
+
+.button {
+    display: inline-block;
+    border: 1.5px solid white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    line-height: 20px;
+    position: relative;
+    transition: padding-right 0.5s;
+    overflow: hidden;
+    margin: 0 5px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.button.activated {
+    padding-right: 30px;
+    cursor: wait;
+}
+
+.button:hover {
+    box-shadow: 0 0 6px white;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#policy-spinner.queued {
+    opacity: 1;
+}
+
+#policy-spinner.queued:after {
+    border: 5px solid #ffce00;
+    border-color: #ffce00 transparent #ffce00 transparent;
+    animation-duration: 2.5s;
+}
+
+#policy-spinner.started {
+    opacity: 1;
+}
+
+#policy-spinner.started:after {
+    border: 5px solid #09e400;
+    border-color: #09e400 transparent #09e400 transparent;
+}
+
+#policy-spinner {
+    display: inline-block;
+    opacity: 0;
+    width: 20px;
+    height: 20px;
+    transition: opacity 0.5s, scale 0.5s, right 0.5s;
+    position: absolute;
+    right: -25px;
+    top: 4px;
+}
+
+.activated #policy-spinner {
+    right: 5px;
+}
+
+#policy-spinner:after {
+    content: " ";
+    display: block;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    margin: 1px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: lds-dual-ring linear infinite;
+    animation-duration: 0.5s;
+    transition: border-color 0.5s, animation-duration 0.5s;
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#error-view {
+    padding-top: 2em;
+}
+
+/************* Examples for custom icons *************/
+
+/* For all elements of type Greeting or its subtypes */
+/*
+	.Greeting-icon {
+		background-image: url('images/Greeting.gif');
+	}
+ */
+
+/* Only in hovers */
+/*
+	.xtext-hover .Greeting-icon {
+		background-image: url('images/Greeting.gif');
+	}
+ */

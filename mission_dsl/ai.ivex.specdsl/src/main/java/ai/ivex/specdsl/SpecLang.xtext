@@ -1,0 +1,263 @@
+grammar ai.ivex.specdsl.SpecLang with org.eclipse.xtext.common.Terminals
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate specLang "http://ivex.ai/specdsl/SpecLang"
+
+Model:
+	blocks+=SpecificationBlock*
+	;
+	
+
+// STATE VECTOR
+
+StateVar:
+	'state' name=StateVarName "can" "be" values+=StateValue (',' values+=StateValue)*
+;
+
+StateVarName:
+	ID
+;
+StateValue:
+	name=ID
+;
+
+ValueAssignment:
+	variable=[StateVar] 'is' value=[StateValue]
+;
+
+EffectValueAssignment:
+	variable=[StateVar] 'becomes' value=[StateValue]
+;
+
+StateVarList:
+	statevars+=[StateVar] (',' statevars+=[StateVar])*
+;
+
+
+PredicateAliasName:
+	ID
+;
+
+PredicateAlias:
+	'define' name=PredicateAliasName 'as' value=Predicate 
+;
+
+// ACTIONS
+
+Action:
+	'action' name=ActionName 
+	('cost:' cost=Cost)?
+	('controlled' 'resources:' resources+=[ActionResource] (',' resources+=[ActionResource])*)?
+	'preconditions:' ('none' | preconditions+=Predicate (',' preconditions+=Predicate)*)
+	'effects:' ('none' | effects+=Predicate (',' effects+=Predicate)*)
+;
+
+ActionName:
+	ID
+;
+
+Cost:
+	value=SIGNEDINT
+;
+
+SIGNEDINT returns ecore::EInt:
+	('+' | '-')? INT
+;
+
+
+
+
+// RESOURCES
+
+ActionResource:
+	'resource' name=ResourceName
+;
+
+ResourceName:
+	ID
+;
+
+
+
+
+
+// REACTION RULES
+
+ReactionRule:
+	'rule:' rule= Predicate
+	//'when' condition=OrPredicate 'then' 'also' 'execute' action=[Action]
+;
+
+
+// ASSUMPTIONS
+
+Assumption:
+	'assume:' predicate=Predicate
+;
+
+
+
+// GOALS
+
+Goal:
+	ConditionalGoal | UnconditionalGoal
+;
+
+UnconditionalGoal returns Goal:
+		SimpleGoal |
+		 NestedGoalList
+;
+
+SimpleGoal returns Goal:
+	{SimpleGoal} 'goal' ':' goalBody=Predicate
+;
+
+ConditionalGoal returns Goal:
+	{ConditionalGoal} 'when' condition=Predicate 'then' goal=UnconditionalGoal
+;
+
+
+NestedGoalList returns Goal:
+	{NestedGoalList} 
+	'BEGIN' 'GOALS'
+		body=NestedGoalListBody
+	'END' 'GOALS'
+;
+
+NestedGoalListBody:
+	'goal' 'type' ':' execution=GoalExecutionType
+	goals+=Goal+
+;
+
+enum GoalExecutionType:
+	PRIORITY='priority' | CONSTRAINT='constraint'
+;
+
+PlanLength:
+	'max_plan_length' ':' max=INT
+;
+
+// PREDICATES
+
+Predicate:
+	EquivalencePredicate
+;
+
+EquivalencePredicate returns Predicate:
+	ImplicationPredicate ({EquivalencePredicate.left=current} "IFONLYIF" right=OrPredicate)?
+;
+
+ImplicationPredicate returns Predicate:
+	OrPredicate | 
+	("IF" {ImplicationPredicate} left=OrPredicate "THEN" right=OrPredicate)
+;
+
+OrPredicate returns Predicate:
+	AndPredicate ({OrPredicate.left=current} "OR" right=AndPredicate)*
+;
+
+AndPredicate returns Predicate:
+	NotPredicate ({AndPredicate.left=current} "AND" right=NotPredicate)*
+;
+
+NotPredicate returns Predicate:
+	{NotPredicate} => "NOT" expression=BasePredicate |
+	BasePredicate
+;
+
+BasePredicate returns Predicate:
+	'(' EquivalencePredicate ')' |
+	{ValueAssignment} valueAssignment=ValueAssignment |
+	{ActionExecution} 'executing' actionExecution=[Action] | 
+	{AliasReference} predicateAlias=[PredicateAlias] |
+	{Constant} value=BOOLEAN
+;
+
+enum BOOLEAN:
+	TRUE='true'| FALSE='false';
+
+
+
+
+// BLOCKS 
+
+SpecificationBlock:
+	AliasBlock |
+	StateVectorBlock |
+	ActionsBlock |
+	ResourcesBlock |
+	ReactionRulesBlock | 
+	AssumptionsBlock |
+	GoalsBlock |
+	ConfigBlock
+;	
+
+StateVectorBlockStart: 'BEGIN' 'STATE' 'VECTOR';
+StateVectorBlockEnd: 'END' 'STATE' 'VECTOR';		
+StateVectorBlock:
+	StateVectorBlockStart
+	stateVars+=StateVar+
+	StateVectorBlockEnd
+;
+
+AliasBlockStart: 'BEGIN' 'ALIASES';
+AliasBlockEnd: 'END' 'ALIASES';
+AliasBlock:
+	AliasBlockStart
+	aliases+=PredicateAlias+
+	AliasBlockEnd
+;
+
+ActionsBlockStart: 'BEGIN' 'ACTIONS';
+ActionsBlockEnd: 'END' 'ACTIONS';
+ActionsBlock:
+	{ActionsBlock}
+	ActionsBlockStart
+	actions+=Action*
+	ActionsBlockEnd
+;
+
+ResourcesBlockStart: 'BEGIN' 'RESOURCES';
+ResourcesBlockEnd: 'END' 'RESOURCES';
+ResourcesBlock:
+	{ResourcesBlock}
+	ResourcesBlockStart
+	resources+=ActionResource*
+	ResourcesBlockEnd
+;
+
+ReactionRulesBlockStart: 'BEGIN' 'REACTION' 'RULES';
+ReactionRulesBlockEnd: 'END' 'REACTION' 'RULES';
+ReactionRulesBlock:
+	{ReactionRulesBlock}
+	ReactionRulesBlockStart
+	reactionRules+=ReactionRule*
+	ReactionRulesBlockEnd
+;
+
+AssumptionsBlockStart: 'BEGIN' 'ASSUMPTIONS';
+AssumptionsBlockEnd: 'END' 'ASSUMPTIONS';
+AssumptionsBlock:
+	{AssumptionsBlock}
+	AssumptionsBlockStart
+	assumptions+=Assumption*
+	AssumptionsBlockEnd
+;
+
+GoalsBlockStart: 'BEGIN' 'GOALS';
+GoalsBlockEnd: 'END' 'GOALS';
+GoalsBlock:
+	{GoalsBlock}
+	GoalsBlockStart
+	goalList=NestedGoalListBody
+	GoalsBlockEnd
+;
+
+ConfigBlockStart: 'BEGIN' 'CONFIG';
+ConfigBlockEnd: 'END' 'CONFIG';
+ConfigBlock returns SpecificationBlock:
+	{ConfigBlock}
+	ConfigBlockStart
+	planLength=PlanLength
+	ConfigBlockEnd
+;

@@ -1,0 +1,95 @@
+.keyword {
+    color: black;
+}
+
+.StateVectorBlockStart, .StateVectorBlockEnd {
+    color: #0000bb;
+    /*color: white;*/
+}
+
+.AliasBlockStart, .AliasBlockEnd {
+    color: #77009c;
+    /*color: white;*/
+}
+
+.ResourcesBlockStart, .ResourcesBlockEnd {
+    color: saddlebrown;
+    /*color: white;*/
+}
+
+.ActionsBlockStart, .ActionsBlockEnd {
+    color: darkred;
+    /*color: white;*/
+}
+
+.ReactionRulesBlockStart, .ReactionRulesBlockEnd {
+    color: #bb8600;
+    /*color: white;*/
+}
+
+.AssumptionsBlockStart, .AssumptionsBlockEnd {
+    color: #00809c;
+    /*color: white;*/
+}
+
+.GoalsBlockStart, .GoalsBlockEnd {
+    color: #009508;
+    /*color: white;*/
+}
+
+.ConfigBlockStart, .ConfigBlockEnd {
+    color: #000000;
+    /*color: white;*/
+}
+
+.annotationRange.writeOccurrence.StateVectorBlockStart, .annotationRange.writeOccurrence.StateVectorBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.AliasBlockStart, .annotationRange.writeOccurrence.AliasBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.ResourcesBlockStart, .annotationRange.writeOccurrence.ResourcesBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.ActionsBlockStart, .annotationRange.writeOccurrence.ActionsBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.ReactionRulesBlockStart, .annotationRange.writeOccurrence.ReactionRulesBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.AssumptionsBlockStart, .annotationRange.writeOccurrence.AssumptionsBlockEnd{
+    color:black
+}
+.annotationRange.writeOccurrence.GoalsBlockStart, .annotationRange.writeOccurrence.GoalsBlockEnd{
+    color:black
+}
+
+.StateVarName, .StateVar-reference {
+    color: #0000bb;
+    font-weight: 600;
+}
+
+.StateValue, .StateValue-reference {
+    color: #005aff;
+    font-style: italic;
+}
+
+.ResourceName, .ActionResource-reference {
+    color: saddlebrown;
+    font-style: italic;
+}
+
+.ActionName, .Action-reference {
+    color: #bf0000;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.PredicateAliasName, .PredicateAlias-reference {
+    color: #b100ff;
+    font-weight: bold;
+}
+
+.annotationRange.writeOccurrence{
+    background: inherit;
+}

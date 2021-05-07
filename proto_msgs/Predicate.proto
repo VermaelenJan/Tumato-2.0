@@ -1,0 +1,61 @@
+syntax = "proto2";
+
+package specdomain;
+
+option java_package = "generated.ai.ivex.specdomain";
+option java_outer_classname = "PredicateProtos";
+
+message Predicate {
+    oneof predicate {
+        ActionExecutionPredicate action_execution_predicate = 1;
+        AliasReferencePredicate alias_reference_predicate = 2;
+        ConstantPredicate constant_predicate = 3;
+        ValueComparisonPredicate value_comparison_predicate = 4;
+        NotPredicate not_predicate = 5;
+        AndPredicate and_predicate = 6;
+        OrPredicate or_predicate = 7;
+        ImplicationPredicate implication_predicate = 8;
+        EquivalencePredicate equivalence_predicate = 9;
+    }
+}
+
+message ActionExecutionPredicate {
+    required string value = 1;
+}
+
+message AliasReferencePredicate {
+    required string value = 1;
+}
+
+message ConstantPredicate {
+    required bool value = 1;
+}
+
+message ValueComparisonPredicate {
+    required string left_value = 1;
+    required string right_value = 2;
+}
+
+message NotPredicate {
+    required Predicate value = 2;
+}
+
+message AndPredicate {
+    required Predicate left_value = 1;
+    required Predicate right_value = 2;
+}
+
+message OrPredicate {
+    required Predicate left_value = 1;
+    required Predicate right_value = 2;
+}
+
+message ImplicationPredicate {
+    required Predicate left_value = 1;
+    required Predicate right_value = 2;
+}
+
+message EquivalencePredicate {
+    required Predicate left_value = 1;
+    required Predicate right_value = 2;
+}

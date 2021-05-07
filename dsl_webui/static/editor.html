@@ -1,0 +1,100 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>IVEX - WebAI Editor</title>
+    <link rel="stylesheet" type="text/css" href="{{ xtext_url }}/orion/code_edit/built-codeEdit.css"/>
+    <link rel="stylesheet" type="text/css" href="{{ xtext_url }}/xtext/2.12.0/xtext-orion.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/syntax-style.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/error-style.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/shCore.css"/>
+    <link rel="stylesheet" type="text/css" href="static/css/shThemeDefault.css"/>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
+    <script type="text/javascript" src="static/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="static/js/xregexp-all.js"></script>
+    <script type="text/javascript" src="static/js/shCore.js"></script>
+    <script type="text/javascript" src="static/js/shBrushJava.js"></script>
+    <script type="text/javascript" src="static/js/shBrushJScript.js"></script>
+    <script type="text/javascript" src="static/js/shBrushPlain.js"></script>
+    <script src="{{ xtext_url }}/webjars/requirejs/2.3.2/require.min.js"></script>
+    <script type="text/javascript" src="static/js/specstorage.js"></script>
+    <script type="text/javascript" src="static/js/util.js"></script>
+    <script type="text/javascript" src="static/js/TabView.js"></script>
+    <script type="text/javascript" src="static/js/OutputViewer.js"></script>
+    <script type="text/javascript" src="static/js/RemoteOutputProvider.js"></script>
+    <script type="text/javascript" src="static/js/DirectOutputProvider.js"></script>
+    <script type="text/javascript" src="static/js/errorViewer.js"></script>
+    <script type="text/javascript" src="static/js/app.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>IVEX - WebAI</h1>
+        <div class="buttons">
+            <div class="button" onclick="window.location='/'">Home</div>
+            <div class="button" onclick="app.saveText()">Save</div>
+            <div class="button" onclick="app.loadText()">Load</div>
+            <div class="button" onclick="app.generatePolicy(event.ctrlKey)"
+                 id="policy-button">Save & Generate Policy
+                <div id="policy-spinner"></div>
+            </div>
+
+        </div>
+
+
+    </div>
+    <div class="content">
+        <div class="editor-wrapper">
+            <div id="xtext-editor" data-editor-xtext-lang="tmt"></div>
+        </div>
+        <div class="output-wrapper" id="output-tab-wrapper">
+            <div id="output-tab-headers" class="tab-generator-headers" data-tab-header-class="tab-header"></div>
+
+            <div id="json-spec-tab" class="output-tab tab-generator-tab" data-tab-title="Json Specification"
+                 data-tab-tag="json">
+                <div id="json-spec-view" class="code-view-wrapper"></div>
+            </div>
+
+            <div id="proto-spec-tab" class="output-tab tab-generator-tab" data-tab-title="Protobuf Specification"
+                 data-tab-tag="proto">
+                <div id="proto-spec-view" class="code-view-wrapper"></div>
+            </div>
+
+            <div id="policy-tab" class="output-tab tab-generator-tab" data-tab-title="Policy" data-tab-tag="policy">
+                <div id="policy-view" class="code-view-wrapper">
+                    <h1>The policy has not yet been generated.</h1>
+                    <br>
+                    <a onclick="app.generatePolicy(event.ctrlKey)">
+                        <h1>Click here to save and generate the policy.</h1>
+                    </a>
+                </div>
+                <div id="error-view"></div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</body>
+
+<script>
+    const xtextUrl = "{{xtext_url}}";
+    const xtextPrefix = '{{xtext_prefix}}';
+
+    const queryVarName = getQueryVariable('name');
+    let specificationName = "Unnamed Specification";
+    if (queryVarName) {
+        specificationName = decodeURIComponent(queryVarName);
+    }
+
+    const queryVarID = getQueryVariable('id');
+    if (!queryVarID) {
+        alert("No Specification ID found. The editor will not work properly. The URL of this page may be malformed.")
+    }
+    const specificationID = decodeURIComponent(queryVarID);
+    const app = init_app(xtextUrl, xtextPrefix, specificationName, specificationID);
+</script>
+
+</html>
