@@ -14,6 +14,7 @@ public abstract class Specification {
       ImmutableSet<StateSpec> stateSpecs,
       ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
       ImmutableSet<ReactionRule> reactionRules,
+      ImmutableSet<StateRule> stateRules,
       ImmutableSet<Assumption> assumptions,
       Goals goals) {
     return new AutoValue_Specification(
@@ -22,6 +23,7 @@ public abstract class Specification {
         stateSpecs,
         mutuallyExclusiveActions,
         reactionRules,
+        stateRules,
         assumptions,
         goals);
   }
@@ -40,6 +42,9 @@ public abstract class Specification {
 
   @VisibleForTesting
   public abstract ImmutableSet<ReactionRule> reactionRules();
+  
+  @VisibleForTesting
+  public abstract ImmutableSet<StateRule> stateRules();
 
   @VisibleForTesting
   public abstract ImmutableSet<Assumption> assumptions();

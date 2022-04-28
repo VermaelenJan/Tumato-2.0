@@ -78,7 +78,12 @@ ResourceName:
 ;
 
 
+// STATE RULES
 
+StateRule:
+	'rule:' rule= Predicate
+	//'when' condition=Predicate1 'then' 'also' condition=Predicate2
+;
 
 
 // REACTION RULES
@@ -187,6 +192,7 @@ SpecificationBlock:
 	ActionsBlock |
 	ResourcesBlock |
 	ReactionRulesBlock | 
+	StateRulesBlock | 
 	AssumptionsBlock |
 	GoalsBlock |
 	ConfigBlock
@@ -233,6 +239,15 @@ ReactionRulesBlock:
 	ReactionRulesBlockStart
 	reactionRules+=ReactionRule*
 	ReactionRulesBlockEnd
+;
+
+StateRulesBlockStart: 'BEGIN' 'STATE' 'RULES';
+StateRulesBlockEnd: 'END' 'STATE' 'RULES';
+StateRulesBlock:
+	{StateRulesBlock}
+	StateRulesBlockStart
+	StateRules+=StateRule*
+	StateRulesBlockEnd
 ;
 
 AssumptionsBlockStart: 'BEGIN' 'ASSUMPTIONS';

@@ -27,6 +27,7 @@ public final class PolicyGenerator {
   private final ImmutableSet<StateSpec> stateSpecs;
   private final ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions;
   private final ImmutableSet<ReactionRule> reactionRules;
+  private final ImmutableSet<StateRule> stateRules;
   private final ImmutableSet<Assumption> assumptions;
   private final Goals goals;
 
@@ -38,6 +39,7 @@ public final class PolicyGenerator {
       ImmutableSet<StateSpec> stateSpecs,
       ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
       ImmutableSet<ReactionRule> reactionRules,
+      ImmutableSet<StateRule> stateRules,
       ImmutableSet<Assumption> assumptions,
       Goals goals) {
     this.maxPlanLength = maxPlanLength;
@@ -45,6 +47,7 @@ public final class PolicyGenerator {
     this.stateSpecs = stateSpecs;
     this.mutuallyExclusiveActions = mutuallyExclusiveActions;
     this.reactionRules = reactionRules;
+    this.stateRules = stateRules;
     this.assumptions = assumptions;
     this.goals = goals;
   }
@@ -56,6 +59,7 @@ public final class PolicyGenerator {
         specification.stateSpecs(),
         specification.mutuallyExclusiveActions(),
         specification.reactionRules(),
+        specification.stateRules(),
         specification.assumptions(),
         specification.goals());
   }
@@ -158,6 +162,7 @@ public final class PolicyGenerator {
               initialStates,
               mutuallyExclusiveActions,
               reactionRules,
+              stateRules,
               assumptions,
               goals,
               ImmutableSet.copyOf(conflictMappings));

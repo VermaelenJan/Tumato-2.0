@@ -98,6 +98,8 @@ reaction_rules_block {
     }
   }
 }
+state_rules_block {
+}
 assumptions_block {
 }
 aliases {

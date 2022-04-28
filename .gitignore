@@ -2,3 +2,7 @@
 .idea
 __pycache__
 venv
+/.metadata/
+**/.DS_Store
+/.project
+/.settings/

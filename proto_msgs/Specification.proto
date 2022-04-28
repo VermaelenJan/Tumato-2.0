@@ -12,10 +12,11 @@ message Specification {
     required ResourceBlock resource_block = 2;
     required ActionBlock actions_block = 3;
     required ReactionRulesBlock reaction_rules_block = 4;
-    required AssumptionsBlock assumptions_block = 5;
-    required AliasBlock aliases = 6;
-    required GoalBlock goal = 7;
-    required Config config = 8;
+    required StateRulesBlock state_rules_block = 5;
+    required AssumptionsBlock assumptions_block = 6;
+    required AliasBlock aliases = 7;
+    required GoalBlock goal = 8;
+    required Config config = 9;
 }
 
 
@@ -42,6 +43,10 @@ message ActionBlock {
 }
 
 message ReactionRulesBlock {
+    repeated Predicate rules = 1;
+}
+
+message StateRulesBlock {
     repeated Predicate rules = 1;
 }
 

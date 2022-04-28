@@ -65,6 +65,8 @@ class CpModelTest {
               model.ifThen(
                   planStep.getExecutingConstraint("go_to_waypoint"),
                   planStep.getExecutingConstraint("turn_on_led_light")));
+  private static final ImmutableSet<StateRule> STATE_RULES =
+      ImmutableSet.of(); // State Rules to be tested (28/04/2022)
   private static final Goals GOALS =
       (model, initialStateValue, initialStateVector, firstPlanStep, goalStateVector) -> {
         goalStateVector.getHasValueConstraint("S_flying", "on_the_ground").post();
@@ -81,6 +83,7 @@ class CpModelTest {
             INITIAL_STATES,
             MUTUALLY_EXCLUSIVE_ACTIONS,
             REACTION_RULES,
+            STATE_RULES,
             ImmutableSet.of(),
             GOALS);
 
@@ -110,6 +113,7 @@ class CpModelTest {
             INITIAL_STATES,
             MUTUALLY_EXCLUSIVE_ACTIONS,
             REACTION_RULES,
+            STATE_RULES,
             ImmutableSet.of(
                 (model, stateVector) ->
                     stateVector.getHasValueConstraint("S_flying", "on_the_ground").post()),
@@ -130,6 +134,7 @@ class CpModelTest {
             INITIAL_STATES,
             MUTUALLY_EXCLUSIVE_ACTIONS,
             REACTION_RULES,
+            STATE_RULES,
             ImmutableSet.of(
                 (model, stateVector) ->
                     stateVector.getHasValueConstraint("S_flying", "on_the_ground").post()),

@@ -5,6 +5,7 @@ import ai.ivex.policygenerator.cpmodel.Assumption;
 import ai.ivex.policygenerator.cpmodel.Goals;
 import ai.ivex.policygenerator.cpmodel.MutuallyExclusiveActions;
 import ai.ivex.policygenerator.cpmodel.ReactionRule;
+import ai.ivex.policygenerator.cpmodel.StateRule;
 import ai.ivex.policygenerator.cpmodel.Specification;
 import ai.ivex.policygenerator.cpmodel.StateSpec;
 import ai.ivex.policygenerator.protobufspec.predicates.AndPredicate;
@@ -77,6 +78,10 @@ public abstract class ProtobufSpecificationParser {
     ImmutableSet<ReactionRule> reactionRules =
         parseReactionRules(
             specification.getReactionRulesBlock(), stateVarMap, actionNames, aliases);
+    
+    ImmutableSet<StateRule> stateRules =
+        parseStateRules(
+            specification.getStateRulesBlock(), stateVarMap, actionNames, aliases);
 
     ImmutableSet<Assumption> assumptions =
         parseAssumptions(specification.getAssumptionsBlock(), stateVarMap, actionNames, aliases);
@@ -93,6 +98,7 @@ public abstract class ProtobufSpecificationParser {
         stateSpecs,
         mutuallyExclusiveActions,
         reactionRules,
+        stateRules,
         assumptions,
         goals);
   }
@@ -233,8 +239,22 @@ public abstract class ProtobufSpecificationParser {
     ImmutableSet.Builder<ReactionRule> resultBuilder = ImmutableSet.builder();
 
     for (PredicateProtos.Predicate predicate : reactionRulesBlock.getRulesList()) {
-      resultBuilder.add(
-          PredicateParser.parsePredicate(predicate, stateVarMap, actionNames, aliases));
+    	resultBuilder.add(PredicateParser.parsePredicate(predicate, stateVarMap, actionNames, aliases));
+    }
+
+    return resultBuilder.build();
+  }
+  
+  private static ImmutableSet<StateRule> parseStateRules(
+	  SpecificationProtos.StateRulesBlock stateRulesBlock,
+      ImmutableMap<String, ImmutableSet<String>> stateVarMap,
+      ImmutableSet<String> actionNames,
+      ImmutableMap<String, Predicate> aliases)
+      throws Exception {
+    ImmutableSet.Builder<StateRule> resultBuilder = ImmutableSet.builder();
+
+    for (PredicateProtos.Predicate predicate : stateRulesBlock.getRulesList()) {
+    	resultBuilder.add(PredicateParser.parsePredicate(predicate, stateVarMap, actionNames, aliases));
     }
 
     return resultBuilder.build();

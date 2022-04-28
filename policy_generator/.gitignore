@@ -25,3 +25,8 @@ out/
 generated_proto/
 /src/test/resources/logback-test.xml
 *.json
+/.project
+/.settings/
+/.classpath
+/.factorypath
+/policy_generator.ipr

@@ -71,9 +71,11 @@ dependencies {
     compile 'org.tukaani:xz:1.8'
 
     testCompile 'org.assertj:assertj-core:3.10.0'
-    testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
-    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
     testCompile 'org.mockito:mockito-core:2.20.0'
+    
+    testRuntimeOnly "org.junit.platform:junit-platform-commons:1.7.0"
 }
 
 idea {

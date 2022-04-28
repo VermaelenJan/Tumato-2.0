@@ -3,6 +3,9 @@ package ai.ivex.policygenerator.cpmodel;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import net.bytebuddy.dynamic.scaffold.MethodRegistry.Handler.ForAbstractMethod;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
@@ -17,6 +20,7 @@ final class CpModel {
   private final StateVectorValue initialStates;
   private final ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions;
   private final ImmutableSet<ReactionRule> reactionRules;
+  private final ImmutableSet<StateRule> stateRules;
   private final ImmutableSet<Assumption> assumptions;
   private final ImmutableSet<Mapping> existingMappings;
   private final Goals goals;
@@ -32,6 +36,7 @@ final class CpModel {
       StateVectorValue initialStates,
       ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
       ImmutableSet<ReactionRule> reactionRules,
+      ImmutableSet<StateRule> stateRules,
       ImmutableSet<Assumption> assumptions,
       Goals goals,
       ImmutableSet<Mapping> existingMappings) {
@@ -40,6 +45,7 @@ final class CpModel {
     this.initialStates = initialStates;
     this.mutuallyExclusiveActions = mutuallyExclusiveActions;
     this.reactionRules = reactionRules;
+    this.stateRules = stateRules;
     this.assumptions = assumptions;
     this.existingMappings = existingMappings;
     this.goals = goals;
@@ -63,6 +69,7 @@ final class CpModel {
       StateVectorValue initialStates,
       ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
       ImmutableSet<ReactionRule> reactionRules,
+      ImmutableSet<StateRule> stateRules,
       ImmutableSet<Assumption> assumptions,
       Goals goals) {
     return new CpModel(
@@ -72,6 +79,7 @@ final class CpModel {
         initialStates,
         mutuallyExclusiveActions,
         reactionRules,
+        stateRules,
         assumptions,
         goals,
         ImmutableSet.of());
@@ -84,6 +92,7 @@ final class CpModel {
       StateVectorValue initialStates,
       ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
       ImmutableSet<ReactionRule> reactionRules,
+      ImmutableSet<StateRule> stateRules,
       ImmutableSet<Assumption> assumptions,
       Goals goals,
       ImmutableSet<Mapping> existingMappings) {
@@ -94,6 +103,7 @@ final class CpModel {
         initialStates,
         mutuallyExclusiveActions,
         reactionRules,
+        stateRules,
         assumptions,
         goals,
         existingMappings);
@@ -105,6 +115,7 @@ final class CpModel {
     addChangeableConstraint();
     addPreconditionAndEffectConstraint();
     addReactionRules();
+    addStateRules();
     addAssumptions();
     addExistingMappings();
     addGoals();
@@ -172,6 +183,15 @@ final class CpModel {
       final StateVector stateVector = stateVectors.get(i);
       reactionRules.forEach(
           reactionRule -> reactionRule.applyConstraint(model, stateVector, planStep));
+    }
+  }
+  
+  private void addStateRules() {
+    for (int i = 0; i < planSteps.size(); i++) {
+      final PlanStep planStep = planSteps.get(i);
+      final StateVector nextStateVector = stateVectors.get(i + 1);
+      stateRules.forEach(
+          stateRule -> stateRule.applyConstraint(model, nextStateVector, planStep));
     }
   }
 
