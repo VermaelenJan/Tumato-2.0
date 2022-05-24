@@ -99,11 +99,18 @@ package class JsonFileGenerator implements ArtifactGenerator {
 			actionObject.add("preconditions", preconditions)
 			
 			
-			val effects = new JsonArray()
-			for(effect : action.effects){
-				effects.add(effect.predicateToJson)
+			val nominalEffects = new JsonArray()
+			for(effect : action.nominalEffects){
+				nominalEffects.add(effect.predicateToJson)
 			}
-			actionObject.add("effects", effects)
+			actionObject.add("nominal effects", nominalEffects)
+			
+			
+			val alternativeEffects = new JsonArray()
+			for(predicate : action.alternativeEffects){
+				alternativeEffects.add(predicate.predicateToJson)
+			}
+			actionObject.add("alternative effects", alternativeEffects)
 			
 			
 			

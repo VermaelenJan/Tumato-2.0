@@ -97,11 +97,17 @@ package class ProtobufFileGenerator {
 			}
 			
 			
-			if(action.effects !== null){
-				for(effect : action.effects){
+			if(action.nominalEffects !== null){
+				for(effect : action.nominalEffects){
 					actionBuilder.addEffects(effect.predicateToProtobuf)
 				}
 			}
+			
+			//if(action.alternativeEffects !== null){
+			//	for(effectList : action.alternativeEffects){
+			//		actionBuilder.addEffects(effectList.predicateToProtobuf)
+			//	}
+			//} //TODO 
 			
 			actionBlockBuilder.addActions(actionBuilder)	
 			
