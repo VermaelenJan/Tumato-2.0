@@ -99,7 +99,7 @@ package class ProtobufFileGenerator {
 			
 			if(action.nominalEffects !== null){
 				for(effect : action.nominalEffects){
-					actionBuilder.addEffects(effect.predicateToProtobuf)
+					actionBuilder.addNominalEffects(effect.predicateToProtobuf)
 				}
 			}
 			
@@ -107,7 +107,7 @@ package class ProtobufFileGenerator {
 			//	for(effectList : action.alternativeEffects){
 			//		actionBuilder.addEffects(effectList.predicateToProtobuf)
 			//	}
-			//} 
+			//} //TODO 
 			
 			actionBlockBuilder.addActions(actionBuilder)	
 			

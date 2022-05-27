@@ -211,7 +211,7 @@ public abstract class ProtobufSpecificationParser {
 
       // Combine the (possibly) multiple effects into a single predicate
       Predicate effect = new ConstantPredicate(true);
-      for (PredicateProtos.Predicate predicate : action.getEffectsList()) {
+      for (PredicateProtos.Predicate predicate : action.getNominalEffectsList()) {
         effect =
             new AndPredicate(
                 effect,

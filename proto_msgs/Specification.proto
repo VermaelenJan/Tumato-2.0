@@ -60,7 +60,12 @@ message Action {
     repeated string resources = 3;
     repeated Predicate preconditions = 4;
     repeated Predicate nominalEffects = 5;
-    repeated AlternativeEffect alternativeEffects = 6;
+    repeated AlternativeEffect alternative_effects = 6;
+}
+
+message AlternativeEffect {
+    repeated Predicate alternativeEffect = 1;
+    repeated AlternativeEffect alternative_effects = 2;
 }
 
 message AliasBlock {
