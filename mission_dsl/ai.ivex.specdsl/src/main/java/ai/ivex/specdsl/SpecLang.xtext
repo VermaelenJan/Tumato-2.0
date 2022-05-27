@@ -58,11 +58,15 @@ Action:
 	('controlled' 'resources:' resources+=[ActionResource] (',' resources+=[ActionResource])*)?
 	'preconditions:' ('none' | preconditions+=Predicate (',' preconditions+=Predicate)*)
 	'nominal' 'effects:' ('none' | nominalEffects+=Predicate (',' nominalEffects+=Predicate)*)
-	('alternative' 'effects:' ('none' | alternativeEffects+=Predicate (',' alternativeEffects+=Predicate)*)*)*
+	(alternativeEffects += AlternativeEffect)*
 ;
 
 ActionName:
 	ID
+;
+
+AlternativeEffect:
+	value='alternative' 'effects:' ('none' | alternativeOutcome+=Predicate (',' alternativeOutcome+=Predicate)*)*
 ;
 
 Cost:

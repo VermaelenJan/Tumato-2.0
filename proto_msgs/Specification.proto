@@ -59,7 +59,8 @@ message Action {
     optional int32 cost = 2 [default = 0];
     repeated string resources = 3;
     repeated Predicate preconditions = 4;
-    repeated Predicate effects = 5;
+    repeated Predicate nominalEffects = 5;
+    repeated AlternativeEffect alternativeEffects = 6;
 }
 
 message AliasBlock {

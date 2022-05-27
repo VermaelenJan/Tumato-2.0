@@ -107,7 +107,7 @@ package class ProtobufFileGenerator {
 			//	for(effectList : action.alternativeEffects){
 			//		actionBuilder.addEffects(effectList.predicateToProtobuf)
 			//	}
-			//} //TODO 
+			//} 
 			
 			actionBlockBuilder.addActions(actionBuilder)	
 			

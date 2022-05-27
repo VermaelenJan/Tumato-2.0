@@ -32,6 +32,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import java.util.Optional
 import org.eclipse.emf.ecore.resource.Resource
+import ai.ivex.specdsl.specLang.AlternativeEffect
 
 package class JsonFileGenerator implements ArtifactGenerator {
 	
@@ -107,17 +108,23 @@ package class JsonFileGenerator implements ArtifactGenerator {
 			
 			
 			val alternativeEffects = new JsonArray()
-			for(predicate : action.alternativeEffects){
-				alternativeEffects.add(predicate.predicateToJson)
+			for(altEffect : action.alternativeEffects){
+				alternativeEffects.add(altEffect.altEffectToJson)
 			}
 			actionObject.add("alternative effects", alternativeEffects)
-			
-			
 			
 			result.add(action.name, actionObject)		
 			
 		}
 		result
+	}
+	
+	def JsonArray altEffectToJson(AlternativeEffect altEffect){
+		val effects = new JsonArray()
+		for(effect : altEffect.alternativeOutcome){
+			effects.add(effect.predicateToJson)
+		}
+		effects
 	}
 	
 	def buildReactionRules(Resource resource){
