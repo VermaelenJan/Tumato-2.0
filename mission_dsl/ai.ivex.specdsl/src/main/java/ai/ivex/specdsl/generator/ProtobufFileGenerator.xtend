@@ -34,6 +34,7 @@ import generated.ai.ivex.specdomain.PredicateProtos
 import generated.ai.ivex.specdomain.SpecificationProtos
 import java.util.Optional
 import org.eclipse.emf.ecore.resource.Resource
+import ai.ivex.specdsl.specLang.AlternativeEffect
 
 package class ProtobufFileGenerator {
 	
@@ -103,17 +104,26 @@ package class ProtobufFileGenerator {
 				}
 			}
 			
-			//if(action.alternativeEffects !== null){
-			//	for(effectList : action.alternativeEffects){
-			//		actionBuilder.addEffects(effectList.predicateToProtobuf)
-			//	}
-			//} //TODO 
+			if(action.alternativeEffects !== null){
+				for(effectList : action.alternativeEffects){
+					actionBuilder.addAlternativeEffects(effectList.alternativeEffectToProtobuf)
+				}
+			}
 			
 			actionBlockBuilder.addActions(actionBuilder)	
 			
 		}
 		actionBlockBuilder.build
 	}
+	
+	def alternativeEffectToProtobuf(AlternativeEffect alternativeEffect){
+		val alternativeEffectsBuilder = SpecificationProtos.AlternativeEffect.newBuilder
+			for(effect : alternativeEffect.getAlternativeOutcome){
+				alternativeEffectsBuilder.addAlternativeEffect(effect.predicateToProtobuf)
+			}		
+		alternativeEffectsBuilder.build
+	}	
+
 	
 	def buildReactionRules(Resource resource){
 		val reactionRulesBlockBuilder = SpecificationProtos.ReactionRulesBlock.newBuilder
