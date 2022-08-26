@@ -2,9 +2,12 @@ package ai.ivex.policygenerator.cpmodel;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,35 +23,43 @@ class CpModelTest {
               1,
               new Object2BooleanOpenHashMap<>(
                   new String[] {"S_flying", "S_destination"}, new boolean[] {true, false}),
+              new ArrayList<Object2BooleanMap<String>>(),
               (model, stateVector) ->
                   stateVector.getHasValueConstraint("S_flying", "on_the_ground"),
-              (model, stateVector) -> stateVector.getHasValueConstraint("S_flying", "flying")),
+							(model, stateVector) -> stateVector.getHasValueConstraint("S_flying", "flying"),
+							new ArrayList<Effect>()),
           ActionSpec.create(
               "land",
               1,
               new Object2BooleanOpenHashMap<>(
                   new String[] {"S_flying", "S_destination"}, new boolean[] {true, false}),
+              new ArrayList<Object2BooleanMap<String>>(),
               (model, stateVector) -> stateVector.getHasValueConstraint("S_flying", "flying"),
               (model, stateVector) ->
-                  stateVector.getHasValueConstraint("S_flying", "on_the_ground")),
+                  stateVector.getHasValueConstraint("S_flying", "on_the_ground"),
+                  new ArrayList<Effect>()),
           ActionSpec.create(
               "go_to_waypoint",
               1,
               new Object2BooleanOpenHashMap<>(
                   new String[] {"S_flying", "S_destination"}, new boolean[] {false, true}),
+              new ArrayList<Object2BooleanMap<String>>(),
               (model, stateVector) ->
                   model.and(
                       stateVector.getHasValueConstraint("S_destination", "not_reached"),
                       stateVector.getHasValueConstraint("S_flying", "flying")),
               (model, stateVector) ->
-                  stateVector.getHasValueConstraint("S_destination", "reached")),
+                  stateVector.getHasValueConstraint("S_destination", "reached"),
+                  new ArrayList<Effect>()),
           ActionSpec.create(
               "turn_on_led_light",
               1,
               new Object2BooleanOpenHashMap<>(
                   new String[] {"S_flying", "S_destination"}, new boolean[] {false, false}),
+              new ArrayList<Object2BooleanMap<String>>(),
               (model, stateVector) -> model.trueConstraint(),
-              (model, stateVector) -> model.trueConstraint()));
+              (model, stateVector) -> model.trueConstraint(),
+              new ArrayList<Effect>()));
   private static final ImmutableSet<StateSpec> STATE_SPECS =
       ImmutableSet.of(
           StateSpec.create("S_flying", ImmutableSet.of("on_the_ground", "flying")),
