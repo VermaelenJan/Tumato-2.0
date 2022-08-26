@@ -9,116 +9,131 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /** @author Hoang Tung Dinh */
 public final class PlanStep {
-  private final Model model;
-  private final ImmutableMap<String, Action> actionNameMap;
+	private final Model model;
+	private final ImmutableMap<String, Action> actionNameMap;
+	private final ImmutableMap<String, ActionSpec> actionSpecMap;
 
-  private final IntVar costVar;
-  private final ImmutableMap<String, Constraint> changeableStateVars;
+	private final IntVar costVar;
+	private final ImmutableMap<String, Constraint> changeableStateVars;
+	private final List<ImmutableMap<String, Constraint>> alternativeChangeableStateVars;
 
-  private PlanStep(Model model, ImmutableSet<ActionSpec> actionSpecs) {
-    this.model = model;
+	private final List<String> sortedActions;
 
-    final ImmutableMap.Builder<String, Action> actionNameMapBuilder = ImmutableMap.builder();
+	private PlanStep(Model model, ImmutableSet<ActionSpec> actionSpecs) {
+		this.model = model;
 
-    actionSpecs.forEach(
-        actionSpec -> {
-          final Action action =
-              Action.create(model, actionSpec.cost(), actionSpec.changeableStateMap());
-          actionNameMapBuilder.put(actionSpec.name(), action);
-        });
+		final ImmutableMap.Builder<String, Action> actionNameMapBuilder = ImmutableMap.builder();
+		final ImmutableMap.Builder<String, ActionSpec> actionSpecMapBuilder = ImmutableMap.builder();
+		this.sortedActions = new ArrayList<String>();
 
-    this.actionNameMap = actionNameMapBuilder.build();
+		actionSpecs.forEach(actionSpec -> {
+			final Action action = Action.create(model, actionSpec.cost(), actionSpec.changeableStateMap(),
+					actionSpec.changeableStateMapAlternatives());
+			actionNameMapBuilder.put(actionSpec.name(), action);
+			actionSpecMapBuilder.put(actionSpec.name(), actionSpec);
+			sortedActions.add(actionSpec.name());
+		});
 
-    this.costVar = model.intVar(Config.MIN_COST, Config.MAX_COST);
-    final IntVar[] actionCosts =
-        this.actionNameMap
-            .values()
-            .stream()
-            .map(action -> action.getCostVar())
-            .toArray(IntVar[]::new);
-    model.sum(actionCosts, "=", costVar).post();
+		this.actionNameMap = actionNameMapBuilder.build();
+		this.actionSpecMap = actionSpecMapBuilder.build();
+		Collections.sort(this.sortedActions);
 
-    final ImmutableMap.Builder<String, Constraint> changeableStateVarsBuilder =
-        ImmutableMap.builder();
+		this.costVar = model.intVar(Config.MIN_COST, Config.MAX_COST);
+		final IntVar[] actionCosts = this.actionNameMap.values().stream().map(action -> action.getCostVar())
+				.toArray(IntVar[]::new);
+		model.sum(actionCosts, "=", costVar).post();
 
-    checkArgument(actionSpecs.size() > 0, "There must be at least one action");
-    final ObjectSet<String> states =
-        actionSpecs.stream().findAny().get().changeableStateMap().keySet();
-    states.forEach(
-        state -> {
-          final Constraint[] changeables =
-              actionNameMap
-                  .values()
-                  .stream()
-                  .map(action -> action.getChangeableStateVars().get(state))
-                  .toArray(Constraint[]::new);
+		final ImmutableMap.Builder<String, Constraint> changeableStateVarsBuilder = ImmutableMap.builder();
 
-          changeableStateVarsBuilder.put(state, model.or(changeables));
-        });
-    this.changeableStateVars = changeableStateVarsBuilder.build();
-  }
+		checkArgument(actionSpecs.size() > 0, "There must be at least one action");
+		final ObjectSet<String> states = actionSpecs.stream().findAny().get().changeableStateMap().keySet();
+		states.forEach(state -> {
+			final Constraint[] changeables = actionNameMap.values().stream()
+					.map(action -> action.getChangeableStateVars().get(state)).toArray(Constraint[]::new);
 
-  static PlanStep create(Model model, ImmutableSet<ActionSpec> actionSpecs) {
-    return new PlanStep(model, actionSpecs);
-  }
+			changeableStateVarsBuilder.put(state, model.or(changeables));
+		});
+		this.changeableStateVars = changeableStateVarsBuilder.build();
 
-  public Constraint getExecutingExactlyConstraint(ImmutableSet<String> actionNames) {
-    Constraint constraint = model.trueConstraint();
+		this.alternativeChangeableStateVars = new ArrayList<ImmutableMap<String, Constraint>>();
 
-    for (final String action : actionNameMap.keySet()) {
-      if (actionNames.contains(action)) {
-        constraint = model.and(constraint, getExecutingConstraint(action));
-      } else {
-        constraint = model.and(constraint, getNotExecutingConstraint(action));
-      }
-    }
+		for (String action : sortedActions) { // Add each effect (nominal + alts) of each action to the list (Actions
+											  // sorted alphabetically, alt effects have fixed order list)
+			alternativeChangeableStateVars.add(actionNameMap.get(action).getChangeableStateVars());
+			alternativeChangeableStateVars.addAll(actionNameMap.get(action).getAlternativeChangeableStateVars());
+		}
+	}
 
-    return constraint;
-  }
+	static PlanStep create(Model model, ImmutableSet<ActionSpec> actionSpecs) {
+		return new PlanStep(model, actionSpecs);
+	}
 
-  public Constraint getExecutingConstraint(String actionName) {
-    return actionNameMap.get(actionName).getExecutingConstraint();
-  }
+	public Constraint getExecutingExactlyConstraint(ImmutableSet<String> actionNames) {
+		Constraint constraint = model.trueConstraint();
 
-  public Constraint getNotExecutingConstraint(String actionName) {
-    return actionNameMap.get(actionName).getNotExecutingConstraint();
-  }
+		for (final String action : actionNameMap.keySet()) {
+			if (actionNames.contains(action)) {
+				constraint = model.and(constraint, getExecutingConstraint(action));
+			} else {
+				constraint = model.and(constraint, getNotExecutingConstraint(action));
+			}
+		}
 
-  Constraint getMutuallyExclusiveConstraint(MutuallyExclusiveActions mutuallyExclusiveActions) {
-    if (mutuallyExclusiveActions.actions().isEmpty()) {
-      return  model.trueConstraint();
-    } else {
-      return model.sum(
-          mutuallyExclusiveActions
-              .actions()
-              .stream()
-              .map(action -> actionNameMap.get(action).getExecutingVar())
-              .toArray(BoolVar[]::new),
-          "<=",
-          1);
-    }
-  }
+		return constraint;
+	}
 
-  IntVar getCostVar() {
-    return costVar;
-  }
+	public Constraint getExecutingConstraint(String actionName) {
+		return actionNameMap.get(actionName).getExecutingConstraint();
+	}
 
-  ImmutableMap<String, Constraint> getChangeableStateVars() {
-    return changeableStateVars;
-  }
+	public Constraint getNotExecutingConstraint(String actionName) {
+		return actionNameMap.get(actionName).getNotExecutingConstraint();
+	}
 
-  ImmutableSet<String> getExecutingActions() {
-    return actionNameMap
-        .entrySet()
-        .stream()
-        .filter(entry -> entry.getValue().getExecutingConstraint().isSatisfied() == ESat.TRUE)
-        .map(Map.Entry::getKey)
-        .collect(ImmutableSet.toImmutableSet());
-  }
+	Constraint getMutuallyExclusiveConstraint(MutuallyExclusiveActions mutuallyExclusiveActions) {
+		if (mutuallyExclusiveActions.actions().isEmpty()) {
+			return model.trueConstraint();
+		} else {
+			return model.sum(
+					mutuallyExclusiveActions.actions().stream()
+							.map(action -> actionNameMap.get(action).getExecutingVar()).toArray(BoolVar[]::new),
+					"<=", 1);
+		}
+	}
+
+	IntVar getCostVar() {
+		return costVar;
+	}
+
+	ImmutableMap<String, Constraint> getChangeableStateVars() {
+		return changeableStateVars;
+	}
+
+	// INCLUDES NOMINALS (alternative means all alternatives in this case)
+	List<ImmutableMap<String, Constraint>> getAlternativeChangeableStateVars() {
+		return alternativeChangeableStateVars;
+	}
+
+	List<String> getSortedActions() {
+		return sortedActions;
+	}
+
+	public ImmutableMap<String, ActionSpec> getActionSpecMap() {
+		return actionSpecMap;
+	}
+
+	ImmutableSet<String> getExecutingActions() {
+		return actionNameMap.entrySet().stream()
+				.filter(entry -> entry.getValue().getExecutingConstraint().isSatisfied() == ESat.TRUE)
+				.map(Map.Entry::getKey).collect(ImmutableSet.toImmutableSet());
+	}
 }
