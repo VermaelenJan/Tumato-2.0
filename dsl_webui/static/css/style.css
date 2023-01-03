@@ -31,7 +31,7 @@ a:hover {
 
 .header {
     display: flex;
-    background: linear-gradient(135deg, #3841b3 0, #3f7f7f 100%);
+    background: linear-gradient(135deg, #f0840a 0, #f00505 100%);
     color: white;
     flex-basis: 3em;
     flex-shrink: 0;

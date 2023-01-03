@@ -55,6 +55,16 @@ public final class StateVector {
         .get(state)
         .getHasSameValueConstraint(otherStateVector.nameStateMap.get(state));
   }
+  
+  public Constraint getHasSameValueConstraint(StateVector otherStateVector) {
+	    Constraint constraint = model.trueConstraint();
+	    for (final String state : nameStateMap.keySet()) {
+	      constraint =
+	          model.and(constraint, getHasSameValueConstraint(state, otherStateVector));
+	    }
+
+	    return constraint;
+	  }
 
   String getValueName(String state) {
     return nameStateMap.get(state).getValueName();

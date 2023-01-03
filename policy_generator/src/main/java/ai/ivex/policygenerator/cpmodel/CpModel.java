@@ -99,6 +99,7 @@ final class CpModel {
 		addAssumptions();
 		addExistingMappings();
 		addGoals();
+		addConsistencyConstraint();
 
 		final IntVar cost = getTotalCost();
 
@@ -110,6 +111,24 @@ final class CpModel {
 			return getSolution();
 		} else {
 			return Optional.empty();
+		}
+	}
+
+	private void addConsistencyConstraint() {
+		for (int i = 0; i < planSteps.size(); i++) {
+			final PlanStep planStep_i = planSteps.get(i);
+			final StateVector stateVector_i = stateVectors.get(i);
+			for (int j = 0; j < i; j++) {
+				final PlanStep planStep_j = planSteps.get(j);
+				final StateVector stateVector_j = stateVectors.get(j);
+
+				actionSpecs.forEach(actionSpec -> model.ifThen(stateVector_i.getHasSameValueConstraint(stateVector_j),
+						model.or(
+								model.and(planStep_i.getExecutingConstraint(actionSpec.name()),
+										planStep_j.getExecutingConstraint(actionSpec.name())),
+								model.and(model.not(planStep_i.getExecutingConstraint(actionSpec.name())),
+										model.not(planStep_j.getExecutingConstraint(actionSpec.name()))))));
+			}
 		}
 	}
 
@@ -235,6 +254,14 @@ final class CpModel {
 		final IntVar cost = model.intVar(Config.MIN_COST, Config.MAX_COST);
 		model.sum(planSteps.stream().map(planStep -> planStep.getCostVar()).toArray(IntVar[]::new), "=", cost).post();
 
+		return cost;
+	}
+
+	public int getFinalCost() {
+		int cost = 0;
+		for (int i = 0; i < planSteps.size(); i++) {
+			cost += planSteps.get(i).getCostVar().getValue();
+		}
 		return cost;
 	}
 

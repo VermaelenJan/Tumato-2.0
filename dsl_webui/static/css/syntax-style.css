@@ -27,6 +27,11 @@
     /*color: white;*/
 }
 
+.StateRulesBlockStart, .StateRulesBlockEnd {
+    color: #8cb334;
+    /*color: white;*/
+}
+
 .AssumptionsBlockStart, .AssumptionsBlockEnd {
     color: #00809c;
     /*color: white;*/
