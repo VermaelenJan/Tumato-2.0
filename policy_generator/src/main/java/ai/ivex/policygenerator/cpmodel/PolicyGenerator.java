@@ -7,11 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +33,7 @@ public final class PolicyGenerator {
 	private final ImmutableSet<Assumption> assumptions;
 	private final Goals goals;
 
-	private Map<StateVectorValue, ImmutableSet<String>> policyMap = new ConcurrentHashMap<>();
+	private Map<StateVectorValue, ImmutableSet<String>> policyMap = new HashMap<>();
 
 	private PolicyGenerator(int maxPlanLength, ImmutableSet<ActionSpec> actionSpecs, ImmutableSet<StateSpec> stateSpecs,
 			ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions, ImmutableSet<ReactionRule> reactionRules,
@@ -116,51 +117,65 @@ public final class PolicyGenerator {
 	}
 
 	synchronized private PlanningResult plan(StateVectorValue initialStates) {
-		PlanningResult bestPlan = null;
-		Map<StateVectorValue, ImmutableSet<String>> bestMap = new ConcurrentHashMap<>(policyMap);
-		final Map<StateVectorValue, ImmutableSet<String>> originalMap = new ConcurrentHashMap<>(policyMap);
+		final Map<StateVectorValue, ImmutableSet<String>> originalMap = new HashMap<>(policyMap);
+		Optional<ResultingPlan> bestPlan = null;
 		int lowestCost = Config.MAX_COST * maxPlanLength;
-		
+		Map<StateVectorValue, ImmutableSet<String>> bestMap = new HashMap<>(policyMap);
+
 		for (int planLength = 1; planLength <= maxPlanLength; planLength++) {
 			int totalCost;
-			policyMap = new ConcurrentHashMap<>(originalMap);
+			Optional<ResultingPlan> plan;
+			HashMap<StateVectorValue, ImmutableSet<String>> tmpPolicyMap = new HashMap<>(originalMap);
+			final Set<Mapping> conflictMappings = new HashSet<>();
 
 			while (true) {
 				final CpModel cpModel = CpModel.create(planLength, actionSpecs, stateSpecs, initialStates,
 						mutuallyExclusiveActions, reactionRules, stateRules, assumptions, goals,
-						ImmutableSet.copyOf(translateMappings(policyMap)));
-				final Optional<ResultingPlan> plan = cpModel.solve();
+						ImmutableSet.copyOf(conflictMappings));
+				plan = cpModel.solve();
 
 				if (plan.isPresent()) {
-					plan.get().mappings().forEach(mapping -> policyMap.put(mapping.states(), mapping.actions()));
-					totalCost = cpModel.getFinalCost();
-					;
-					break;
+					final Set<Mapping> newConflictMappings = getConflictMappings(plan.get(), tmpPolicyMap);
+
+					if (newConflictMappings.isEmpty()) {
+						plan.get().mappings().forEach(mapping -> tmpPolicyMap.put(mapping.states(), mapping.actions()));
+						totalCost = cpModel.getFinalCost();
+						break;
+					} else {
+						conflictMappings.addAll(newConflictMappings);
+					}
 				} else {
-					totalCost = Config.MAX_COST;
+					totalCost = Config.MAX_COST * maxPlanLength;
 					break;
 				}
 			}
 
 			if (totalCost < lowestCost) {
-				bestPlan = PlanningResult.create(PlanningStatus.SUCCEEDED, initialStates);
+				bestPlan = plan;
 				lowestCost = totalCost;
-				bestMap = policyMap;
-			} else {
+				bestMap = tmpPolicyMap;
+
+				if (totalCost == 0) {
+					break;
+				}
 			}
 		}
+
 		policyMap = bestMap;
 		if (bestPlan != null) {
-			return bestPlan;
+			return PlanningResult.create(PlanningStatus.SUCCEEDED, initialStates);
 		} else {
 			return PlanningResult.create(PlanningStatus.FAILED, initialStates);
 		}
 	}
 
-	private Set<Mapping> translateMappings(Map<StateVectorValue, ImmutableSet<String>> currentMapping) {
-		HashSet<Mapping> result = new HashSet<Mapping>();
-		currentMapping.forEach((key, value) -> result.add(Mapping.create(key, value)));
-		return result;
+	private Set<Mapping> getConflictMappings(ResultingPlan resultingPlan,
+			HashMap<StateVectorValue, ImmutableSet<String>> tmpPolicyMap) {
+		return resultingPlan.mappings().stream()
+				.filter(mapping -> tmpPolicyMap.containsKey(mapping.states())
+						&& !tmpPolicyMap.get(mapping.states()).equals(mapping.actions()))
+				.map(mapping -> Mapping.create(mapping.states(), tmpPolicyMap.get(mapping.states())))
+				.collect(Collectors.toSet());
 	}
 
 	private static final class PlanningResult {
