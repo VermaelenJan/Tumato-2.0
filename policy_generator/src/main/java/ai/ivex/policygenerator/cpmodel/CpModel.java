@@ -8,6 +8,7 @@ import ai.ivex.policygenerator.protobufspec.predicates.Predicate;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.List;
@@ -31,6 +32,7 @@ final class CpModel {
 	private final ImmutableList<StateVector> stateVectors;
 
 	private final ImmutableList<ImmutableList<StateVector>> alternativeStateVectors;
+	private IntVar totalCost;
 
 	private CpModel(int planLength, ImmutableSet<ActionSpec> actionSpecs, ImmutableSet<StateSpec> stateSpecs,
 			StateVectorValue initialStates, ImmutableSet<MutuallyExclusiveActions> mutuallyExclusiveActions,
@@ -71,6 +73,8 @@ final class CpModel {
 			alternativeStateVectorBuilder.add(altVectorListBuilder.build());
 		}
 		this.alternativeStateVectors = alternativeStateVectorBuilder.build();
+		
+		this.totalCost = getTotalCost();
 	}
 
 	static CpModel create(int planLength, ImmutableSet<ActionSpec> actionSpecs, ImmutableSet<StateSpec> stateSpecs,
@@ -101,9 +105,8 @@ final class CpModel {
 		addGoals();
 		addConsistencyConstraint();
 
-		final IntVar cost = getTotalCost();
 
-		model.setObjective(Model.MINIMIZE, cost);
+		model.setObjective(Model.MINIMIZE, totalCost);
 
 		final boolean hasSolution = model.getSolver().solve();
 
@@ -251,18 +254,28 @@ final class CpModel {
 	}
 
 	private IntVar getTotalCost() {
+		IntVar costsIntVars[] = new IntVar[planSteps.size()];
 		final IntVar cost = model.intVar(Config.MIN_COST, Config.MAX_COST);
-		model.sum(planSteps.stream().map(planStep -> planStep.getCostVar()).toArray(IntVar[]::new), "=", cost).post();
+		
+		for (int i = 0; i < planSteps.size(); i++) {
+			costsIntVars[i] = model.intVar(Config.MIN_COST, Config.MAX_COST);
+			final StateVector stateVector = stateVectors.get(i);
+			final PlanStep planStep = planSteps.get(i);
+			
+			Constraint violation = model.falseConstraint();
+			for (StateRule stateRule : stateRules) {
+				violation = model.or(violation, model.not(((Predicate) stateRule).getConstraint(model, stateVector, planStep)));
+			}
+			
+			model.ifThenElse(violation, model.arithm(costsIntVars[i], "=", planStep.getCostVar()), model.arithm(costsIntVars[i], "=", 0));
+		}
 
+		model.sum(costsIntVars, "=", cost).post();
 		return cost;
 	}
 
 	public int getFinalCost() {
-		int cost = 0;
-		for (int i = 0; i < planSteps.size(); i++) {
-			cost += planSteps.get(i).getCostVar().getValue();
-		}
-		return cost;
+		return totalCost.getValue();
 	}
 
 	private Optional<ResultingPlan> getSolution() {

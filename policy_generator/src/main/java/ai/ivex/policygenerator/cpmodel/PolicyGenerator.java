@@ -119,7 +119,7 @@ public final class PolicyGenerator {
 	synchronized private PlanningResult plan(StateVectorValue initialStates) {
 		final Map<StateVectorValue, ImmutableSet<String>> originalMap = new HashMap<>(policyMap);
 		Optional<ResultingPlan> bestPlan = null;
-		int lowestCost = Config.MAX_COST * maxPlanLength;
+		int lowestCost = Config.MAX_COST;
 		Map<StateVectorValue, ImmutableSet<String>> bestMap = new HashMap<>(policyMap);
 
 		for (int planLength = 1; planLength <= maxPlanLength; planLength++) {
@@ -145,7 +145,7 @@ public final class PolicyGenerator {
 						conflictMappings.addAll(newConflictMappings);
 					}
 				} else {
-					totalCost = Config.MAX_COST * maxPlanLength;
+					totalCost = Config.MAX_COST;
 					break;
 				}
 			}

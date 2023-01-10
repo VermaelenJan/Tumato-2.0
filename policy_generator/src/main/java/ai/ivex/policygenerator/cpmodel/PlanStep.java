@@ -30,7 +30,7 @@ public final class PlanStep {
 
 	private PlanStep(Model model, ImmutableSet<ActionSpec> actionSpecs) {
 		this.model = model;
-
+		
 		final ImmutableMap.Builder<String, Action> actionNameMapBuilder = ImmutableMap.builder();
 		final ImmutableMap.Builder<String, ActionSpec> actionSpecMapBuilder = ImmutableMap.builder();
 		this.sortedActions = new ArrayList<String>();
