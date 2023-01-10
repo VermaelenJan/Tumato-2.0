@@ -54,7 +54,7 @@ PredicateAlias:
 
 Action:
 	'action' name=ActionName 
-	('cost:' cost=Cost)?
+	('duration:' cost=Cost)?
 	('controlled' 'resources:' resources+=[ActionResource] (',' resources+=[ActionResource])*)?
 	'preconditions:' ('none' | preconditions+=Predicate (',' preconditions+=Predicate)*)
 	'nominal' 'effects:' ('none' | nominalEffects+=Predicate (',' nominalEffects+=Predicate)*)
