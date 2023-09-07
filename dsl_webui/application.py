@@ -106,7 +106,7 @@ def get_headers(resp):
 
 @app.route('/spec/<path:filename>', methods=['GET'])
 def load_spec(filename):
-    return send_from_directory(directory=SAVED_SPEC_DIR, filename=filename)
+    return send_from_directory(directory=SAVED_SPEC_DIR, path=filename)
 
 
 @app.route('/spec/<path:filename>', methods=['POST'])

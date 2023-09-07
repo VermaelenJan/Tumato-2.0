@@ -94,7 +94,7 @@ public final class PolicyGenerator {
 				break;
 			}
 
-			logger.info("Number of solved problems: " + i);
+			logger.info("Number of solved problems: " + (i+1));
 		}
 
 		executorService.shutdownNow();

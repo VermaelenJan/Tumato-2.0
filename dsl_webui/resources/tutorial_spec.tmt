@@ -43,14 +43,14 @@ action take_off
 controlled resources: VELOCITY_CONTROL
 preconditions:
 S_flying is on_the_ground
-effects:
+nominal effects:
 S_flying is flying
 
 action land
 controlled resources: VELOCITY_CONTROL
 preconditions:
 S_flying is flying
-effects:
+nominal effects:
 S_flying is on_the_ground
 
 // The beep action shows how to specify an action without preconditions and effects. Every action must
@@ -58,7 +58,7 @@ S_flying is on_the_ground
 action beep
 controlled resources: BEEPER
 preconditions: none
-effects: none
+nominal effects: none
 
 END ACTIONS
 
