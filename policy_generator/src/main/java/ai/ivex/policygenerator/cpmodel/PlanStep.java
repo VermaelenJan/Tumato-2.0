@@ -2,6 +2,8 @@ package ai.ivex.policygenerator.cpmodel;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -89,6 +91,12 @@ public final class PlanStep {
 		}
 
 		return constraint;
+	}
+	
+	public Constraint getNothingExecutingConstraint() {
+		Builder<String> setBuilder = ImmutableSet.builder();
+		ImmutableSet<String> emptySet = setBuilder.build();
+		return getExecutingExactlyConstraint(emptySet);
 	}
 
 	public Constraint getExecutingConstraint(String actionName) {

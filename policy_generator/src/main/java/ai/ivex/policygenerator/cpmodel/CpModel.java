@@ -215,16 +215,28 @@ final class CpModel {
 
 	private void addStateRules() {
 		for (int i = 0; i < planSteps.size(); i++) {
+			//System.out.println("plan step " + i);
 			final PlanStep planStep = planSteps.get(i);
 			int j = 0;
 			for (String action : planStep.getSortedActions()) {
+				//System.out.println("action " + action);
 				for (int k = 0; k < planStep.getActionSpecMap().get(action).alternativeEffects().size() + 1; k++) {
+					//System.out.println("alt effect number " + k);
 					final StateVector nextStateVector = alternativeStateVectors.get(i + 1).get(j);
+					//stateRules.forEach(rule -> System.out.println(rule));
 					stateRules.forEach(stateRule -> model.ifThen(planStep.getExecutingConstraint(action),
 							((Predicate) stateRule).getConstraint(model, nextStateVector, planStep)));
 					j++;
 				}
 			}
+			
+			final StateVector nextStateVector = stateVectors.get(i+1);
+			stateRules.forEach(stateRule ->
+				model.ifThen(
+					planStep.getNothingExecutingConstraint(), 
+					((Predicate) stateRule).getConstraint(model, nextStateVector, planStep)
+				)
+			);
 		}
 	}
 

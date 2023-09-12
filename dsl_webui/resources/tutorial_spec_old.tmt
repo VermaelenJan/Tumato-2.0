@@ -1,0 +1,150 @@
+/*
+ * The State Vector defines the different variables which describe the state of the vehicle.
+ * You need to define at least one state variable, along with its possible values.
+ */
+BEGIN STATE VECTOR
+
+state S_flying can be 
+flying, on_the_ground
+
+
+END STATE VECTOR
+
+BEGIN ALIASES
+
+// For brevity and easier readability, aliases can be defined for predicates.
+// Once defined, these can be used anywhere you'd be able to use the full predicate
+define is_landed as
+S_flying is on_the_ground
+
+END ALIASES
+
+
+/*
+ * Resources can be used to prevent mutually exclusive actions from being executed at the same time.
+ * When multiple actions "use" the same resource, they cannot be active at the same time.
+ */
+BEGIN RESOURCES
+
+resource VELOCITY_CONTROL
+resource BEEPER
+
+END RESOURCES
+
+
+/*
+ * The following list defines which actions the vehicle can execute.
+ * For each action, you can also specify what resources are required, the preconditions
+ * and the effect of the action.
+ */
+BEGIN ACTIONS
+
+action take_off
+controlled resources: VELOCITY_CONTROL
+preconditions:
+S_flying is on_the_ground
+nominal effects:
+S_flying is flying
+
+action land
+controlled resources: VELOCITY_CONTROL
+preconditions:
+S_flying is flying
+nominal effects:
+S_flying is on_the_ground
+
+// The beep action shows how to specify an action without preconditions and effects. Every action must
+// specify a resource
+action beep
+controlled resources: BEEPER
+preconditions: none
+nominal effects: none
+
+END ACTIONS
+
+
+/*
+ * Reaction Rules allow you to specify condition for which an action must certainly execute.
+ * These conditions can involve state variables, as well as the execution state of other actions
+ */
+BEGIN REACTION RULES
+
+// In this case, whenever the vehicle is executing the land action, 
+//it must always also execute the beep action
+rule: IF executing land THEN executing beep
+
+END REACTION RULES
+
+
+/*
+ * Assumptions allow you to specify additional knowledge about the mission.
+ * The behavior solver will consider states in which the assumptions are satisfied.
+ * You should only add assumptions for which you are certain they will not be broken.
+ */
+BEGIN ASSUMPTIONS
+
+assume: S_flying is on_the_ground IFONLYIF NOT S_flying is flying
+
+END ASSUMPTIONS
+
+
+/*
+ * Goals are how the vehicle is motivated to actually execute actions.
+ * The list of goals below is considered from the top to bottom, checking whether 
+ * the condition for each goal is satisfied.
+ * Once a goal is found for which the condition is satisfied, no further goals are considered.
+ * This means that the order in which goals are specified also implies their priority!
+ */
+BEGIN GOALS
+
+// The priority goal type means that only the first goal with a condition that is satisfied will be activated.
+// If a goal has no condition, it acts as if it is satisfied.
+goal type: priority
+
+// It is possible to specify a "true" goal. This will always be satisfied. In this case, the vehicle does 
+// not have a goal when S_flying is flying.
+when 
+S_flying is flying
+then goal: true 
+
+// Here we show how to use the alias we have defined above. 
+// When the vehicle is landed, its goal is to make S_flying to be flying
+when is_landed
+then goal:
+S_flying is flying
+
+// This goal will never be executed, since if is_landed is true, it will also 
+// match the previous goal and execute that one.
+// This goal demonstrates how to use hierarchical goal lists.
+// Instead of specifying a single goal, we can specify a list of goals inside curly braces
+// In this cases, we have specified nested goals.
+when is_landed
+then 
+	BEGIN GOALS
+	goal type: priority
+	
+	goal: executing take_off // Also note how executing an action can also be a goal.
+	
+	goal: S_flying is flying
+	END GOALS
+	
+
+// It is also possible to declare a goal list as using constraint goals
+// In that case, every goal in the list will be active if the list is active.
+// So the two goals in the list defined below will only be active if none of the goals above are active
+BEGIN GOALS
+	goal type: constraint
+	
+	goal: executing beep
+	goal: S_flying is flying
+END GOALS
+
+END GOALS
+
+BEGIN CONFIG
+
+// This determines how many steps the planner has to reach a goal. 
+// If a goal takes more than this amount of steps, the solver will not be able to find a plan to reach that goal.
+max_plan_length: 10
+
+END CONFIG
