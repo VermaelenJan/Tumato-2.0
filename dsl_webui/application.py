@@ -49,9 +49,9 @@ def compile_policy():
 @app.route('/policy/<string:filename>/<string:downloadname>/download', methods=['GET'])
 def download(filename, downloadname):
     return send_from_directory(directory=STORAGE_DIR,
-                               filename=filename,
+                               path=filename,
                                as_attachment=True,
-                               attachment_filename=downloadname)
+                               download_name=downloadname)
 
 
 @app.route('/policy/<string:filename>/part/<int:start_line>/<int:amount>', methods=['GET'])
