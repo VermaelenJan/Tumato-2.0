@@ -38,9 +38,9 @@ END RESOURCES
  * For each action, you can also specify what resources are required, the preconditions
  * and the effects of the action. A distinction is made between nominal (most likely, intended)
  * effects and alternative (less likely and less desired) effects. Nominal effects are used to plan towards
- * the goals while alternative effects are considered only when guaranteeing safety.
+ * the goals while alternative effects are considered only when guaranteeing safety. Note: although technically
+ * possible, effects should not be defined using OR-predicates to avoid non-determinism.
  * Finally, durations can be specified to guide Tumato in restoring safety the "fastest" way, when needed.
- * The use of durations does however reduce the performance of the solver.
  */
 BEGIN ACTIONS
 action beacon_on
@@ -121,10 +121,13 @@ END STATE RULES
  * Assumptions allow you to specify additional knowledge about the system and its environment.
  * The behavior solver will only consider states in which the assumptions are satisfied.
  * You should only add assumptions for which you are certain they will not be broken.
+ * Note: If you add an assumption identical to a state rule, the state rule will still be enforced but "restoring
+ * safety" will not be considered; i.e. assuming that the state rule will never be violated.
  */
 BEGIN ASSUMPTIONS
 //assume: S_Beacon is on IFONLYIF NOT S_Beacon is off // A trivial (and unnecessary) example
 //assume: IF S_Charging is active then S_Location is charger // An example where charging could be detected
+//assume: IF S_Location is hallway OR S_Location is workstation THEN S_Beacon is on // (avoid "restoring safety")
 END ASSUMPTIONS
 
 
