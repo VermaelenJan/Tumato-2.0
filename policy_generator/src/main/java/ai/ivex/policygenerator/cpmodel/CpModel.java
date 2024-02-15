@@ -104,9 +104,8 @@ final class CpModel {
 		addGoals();
 		addConsistencyConstraint();
 
-
 		model.setObjective(Model.MINIMIZE, totalCost);
-
+		
 		final boolean hasSolution = model.getSolver().solve();
 
 		if (hasSolution) {
@@ -114,6 +113,14 @@ final class CpModel {
 		} else {
 			return Optional.empty();
 		}
+	}
+	
+	public int getNbConstraints() {
+		return model.getNbCstrs();
+	}
+	
+	public int getNbVars() {
+		return model.getNbVars();
 	}
 
 	private void addConsistencyConstraint() {

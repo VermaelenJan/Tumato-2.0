@@ -55,6 +55,8 @@ public final class PolicyGenerator {
 	}
 
 	public Result generatePolicy() {
+		long startTime = System.currentTimeMillis();
+		
 		final InitialStateGenerator initialStateGenerator = InitialStateGenerator.create(stateSpecs);
 		final Set<StateVectorValue> allStates = initialStateGenerator.generateInitialStates();
 
@@ -98,6 +100,11 @@ public final class PolicyGenerator {
 		}
 
 		executorService.shutdownNow();
+		
+		long endTime = System.currentTimeMillis();
+		long elapsedTime = (endTime - startTime);
+		//logger.info("Elapsed time while generating the policy: " + elapsedTime + " ms.");
+		
 		if (planningStatus == PlanningStatus.SUCCEEDED) {
 			return Result.createSuccessResultWithPolicy(Policy.create(stateSpecs, actionSpecs,
 					policyMap.entrySet().stream().map(mapping -> Mapping.create(mapping.getKey(), mapping.getValue()))
@@ -117,6 +124,12 @@ public final class PolicyGenerator {
 	}
 
 	synchronized private PlanningResult plan(StateVectorValue initialStates) {
+		// For logging purposes:
+		int lowestNbConstraints = Integer.MAX_VALUE;
+		int highestNbConstraints = 0;
+		int lowestNbVariables = Integer.MAX_VALUE;
+		int highestNbVariables = 0;
+		
 		final Map<StateVectorValue, ImmutableSet<String>> originalMap = new HashMap<>(policyMap);
 		Optional<ResultingPlan> bestPlan = null;
 		int lowestCost = Config.MAX_COST;
@@ -132,7 +145,23 @@ public final class PolicyGenerator {
 				final CpModel cpModel = CpModel.create(planLength, actionSpecs, stateSpecs, initialStates,
 						mutuallyExclusiveActions, reactionRules, stateRules, assumptions, goals,
 						ImmutableSet.copyOf(conflictMappings));
+				
 				plan = cpModel.solve();
+				int nbConstraints = cpModel.getNbConstraints();
+				int nbVariables = cpModel.getNbVars();
+				if (nbConstraints < lowestNbConstraints) {
+					lowestNbConstraints = nbConstraints;
+				}
+				if (nbConstraints > highestNbConstraints) {
+					highestNbConstraints = nbConstraints;
+				}
+				if (nbVariables < lowestNbVariables) {
+					lowestNbVariables = nbVariables;
+				}
+				if (nbConstraints > highestNbVariables) {
+					highestNbVariables = nbVariables;
+				}
+
 
 				if (plan.isPresent()) {
 					final Set<Mapping> newConflictMappings = getConflictMappings(plan.get(), tmpPolicyMap);
@@ -149,13 +178,17 @@ public final class PolicyGenerator {
 					break;
 				}
 			}
+			
+			//logger.info("Number of constraints: " + lowestNbConstraints + " to " + highestNbConstraints);
+			//logger.info("Number of variables: " + lowestNbVariables + " to " + highestNbVariables);
+
 
 			if (totalCost < lowestCost) {
 				bestPlan = plan;
 				lowestCost = totalCost;
 				bestMap = tmpPolicyMap;
 
-				if (totalCost == 0) {
+				if (totalCost < Config.MAX_COST) { //TODO: (totalCost == 0), for now: shortest (optimized) solution is equally good...
 					break;
 				}
 			}
