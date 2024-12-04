@@ -39,13 +39,13 @@ SSL can be enabled by chaning the `USE_SSL` setting in `dsl_webui/config.py` to 
 ### XTEXT Server
 The Xtext server runs on port 8080 by default. You do not need to connect to this server directly, the application server will proxy that for you.
 This port can be changed in `mission_dsl/ai.ivex.specdsl.web/src/main/java/ai/ivex/specdsl/web/ServerLauncher.xtend` in the first line of the main function.
-If you change this port, you'll also need to update the `XTEXT_PORT` setting in `dsl_webuit/config.py` to match. 
+If you change this port, you'll also need to update the `XTEXT_PORT` setting in `dsl_webuit/config.py` to match.
 If the Xtext server is running on a different host, update `XTEXT_HOST` to the address of that host
 
 ### Policy Generator Server
 The policy generator server runs on port 8085 by default. You do not need to connect to this server directly, it is only used by the application server.
 The port can be changed in `policy_generator/src/main/java/ai/ivex/policygenerator/server/Server.java`
-If you change this port, you'll also need to update the `POLICY_GENERATOR_PORT` setting in `dsl_webuit/config.py` to match. 
+If you change this port, you'll also need to update the `POLICY_GENERATOR_PORT` setting in `dsl_webuit/config.py` to match.
 If the policy generator server is running on a different host, update `POLICY_GENERATOR_HOST` to the address of that host
 
 ## Execution
@@ -63,3 +63,15 @@ In the dsl_webui directory.
 ### Policy Generator server
 In the policy_generator directory.
 ```./gradlew startServer```
+
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). You are free to:
+
+- Share: Copy and redistribute the material in any medium or format.
+- Adapt: Remix, transform, and build upon the material.
+
+Under the following terms:
+
+- **Attribution**: You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+- **NonCommercial**: You may not use the material for commercial purposes.
